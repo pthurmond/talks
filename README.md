@@ -1,2 +1,2 @@
-# talks
+# Talks
 Talks that I present publicly.
