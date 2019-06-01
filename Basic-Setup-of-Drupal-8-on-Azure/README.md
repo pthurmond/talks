@@ -1,6 +1,7 @@
 # Information
 I have broken down this README into multiple files so that you can jump to the bit you need.
 
+
 ### Table of Contents
 [The Story](Story.md)
 
@@ -13,5 +14,12 @@ I have broken down this README into multiple files so that you can jump to the b
 [Other Possible Approaches](Other-Possible-Approaches.md)
 
 
+### Video
+The video of my talk.
+
+[Basic Setup of Drupal 8 on an Azure App Service](https://www.youtube.com/watch?v=VferBtce9dY)
+
+
 # Related Files
 I have added related scripts and files to this repository under the "scripts-and-files" directory. In it, you will find my solution, the Docksal configuration I used, the htaccess files I configured, the scripts I created for Azure, and even the README documentation I left for the hand-off to the next set of developers.
+
