@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+## Run drush command in project docroot
+##
+## Usage: fin ddrush <command>
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+header "DOCKSAL-DRUSH"
+
+cd $DOCROOT_PATH
+
+# @todo Find uri in yaml and pass through from alias
+# @todo maybe convert to php
+
+fin drush $@
+
+#-------------------------- END: Execution --------------------------------

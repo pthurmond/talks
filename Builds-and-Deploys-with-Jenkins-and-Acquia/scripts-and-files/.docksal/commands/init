@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+
+## Initialize Project
+##
+## Usage: fin init
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+  echo-red "\$PROJECT_ROOT is not set"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+for var in "$@"
+do
+  case $var in
+    builder)
+      BUILDER="true"
+      ;;
+  esac
+done
+
+header "Project initialization"
+section=Project
+step=1
+
+step_header "Starting project initialization"
+
+# Project initialization steps
+step_header "Creating volumes"
+
+fin docker volume list | grep composer_cache > /dev/null 2>&1 || fin docker volume create composer_cache > /dev/null 2>&1
+
+fin docker volume list | grep db_backup > /dev/null 2>&1 || fin docker volume create db_backup > /dev/null 2>&1
+
+if [[ $DOCKER_RUNNING == "false" ]]; then
+  step_header "Starting services"
+  fin up > /dev/null 2>&1
+fi
+
+# Initialize git
+PRE_COMMIT_PATH="${PROJECT_ROOT}/hooks/pre-commit"
+GIT_DIRECTORY_PATH="${PROJECT_ROOT}/.git"
+GIT_HOOKS_PATH="${GIT_DIRECTORY_PATH}/hooks"
+GIT_PRE_COMMIT_PATH="${GIT_HOOKS_PATH}/pre-commit"
+
+if [[ -d $GIT_DIRECTORY_PATH ]]; then
+
+  if [[ ! -d $GIT_HOOKS_PATH ]]; then
+    mkdir "$GIT_HOOKS_PATH"
+  fi
+
+  if [[ ! -d $GIT_HOOKS_PATH ]]; then
+    step_header "Skipping: git pre-commit creation (.git/hooks directory could not be created)"
+  elif [[ -f $GIT_PRE_COMMIT_PATH ]]; then
+    step_header "Skipping: git pre-commit creation (pre-commit already set)"
+  elif [[ ! -f $PRE_COMMIT_PATH ]]; then
+    step_header "Skipping: git pre-commit creation (source pre-commit file missing)"
+  else
+    step_header "Running: git pre-commit creation"
+    ln -s $PRE_COMMIT_PATH $GIT_PRE_COMMIT_PATH
+  fi
+else
+  step_header "Skipping: git pre-commit creation (.git directory missing)"
+fi
+
+# Initialize dependencies
+if [[ $BUILDER == "true" ]]; then
+  fin init-deps builder
+else
+  fin init-deps
+fi
+
+# Initialize sites
+if [[ $BUILDER == "true" ]]; then
+  fin init-site builder
+else
+  fin init-site
+fi
+
+# Re-set placeholders
+section=Project
+step=4
+
+# Build theme src files
+step_header "Downloading frontend dependencies."
+fin swig setup
+
+step_header "Preparing Patternlab components."
+fin swig patternlab
+
+step_header "Building Patternlab components."
+fin swig gulp-compile
+
+step_header "Building theme asset files."
+fin swig gulp-build
+
+step_header "Building Vuejs components."
+fin swig vue:build
+
+# Synchronize environment
+step_header "Synchronizing Environment"
+
+# @todo uncomment when a test server environment exists
+# fin sync --skip-composer -y
+
+# Run Builder cleanup
+if [[ $BUILDER == "true" ]]; then
+  step_header "Removing files unnecessary for production"
+  # do builder cleanup with dependency removal
+fi
+
+step_header "Finished project initialization"
+
+#-------------------------- END: Execution --------------------------------

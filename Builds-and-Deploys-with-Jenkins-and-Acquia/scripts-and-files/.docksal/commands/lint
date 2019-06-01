@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+## Run all linters against specified files, dirs
+##
+## Usage: fin lint <path>
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$1" == "" ]]; then
+  echo "Usage: fin lint <path>"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+EXIT_CODE=0
+
+if [[ -z "$@" ]]; then
+  exit 0;
+fi
+
+header "Code Linter"
+
+# fin eslint $@
+EXIT_CODE=$(($EXIT_CODE + $?))
+
+fin phpcs $@
+EXIT_CODE=$(($EXIT_CODE + $?))
+
+exit $EXIT_CODE
+
+#-------------------------- END: Execution --------------------------------

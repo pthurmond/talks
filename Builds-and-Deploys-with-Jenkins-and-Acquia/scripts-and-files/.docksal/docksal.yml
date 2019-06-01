@@ -1,0 +1,5 @@
+version: "2.1"
+services:
+  cli:
+    image: unitedrentals/cli:2.2-php7.2
+    build: ${PROJECT_ROOT}/.docksal/services/cli

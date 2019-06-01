@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+## Run composer command in project docroot
+##
+## Usage: fin composer <command>
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+for var in "$@"
+do
+  case $var in
+    install)
+      CLEAN="true"
+      ;;
+    update)
+      CLEAN="true"
+      ;;
+  esac
+done
+
+if [[ $CLEAN == "true" ]]; then
+  subheader "Cleaning directories"
+  cd $PROJECT_ROOT
+  clean_dependency_directories
+fi
+
+cd $PROJECT_ROOT
+fin exec composer $@
+
+#-------------------------- END: Execution --------------------------------

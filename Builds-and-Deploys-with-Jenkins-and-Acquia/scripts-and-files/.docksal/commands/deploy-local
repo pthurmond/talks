@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+## Initialize Project
+##
+## Usage: fin init
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+  echo-red "\$PROJECT_ROOT is not set"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+for var in "$@"
+do
+  case $var in
+    builder)
+      BUILDER="true"
+      ;;
+  esac
+done
+
+header "Project deploy"
+section=Project
+
+step=1
+step_header "Cache clear and Config sync"
+
+fin ddrush cr
+fin ddrush cim sync -y --strict=0
+
+step=2
+step_header "Disable SimpleSAML locally"
+fin ddrush pmu simplesamlphp_auth -y
+
+step=3
+step_header "Run database updates"
+fin ddrush updatedb -y --strict=0
+
+step=4
+step_header "Run entity updates"
+fin ddrush entup -y --strict=0
+
+step=5
+step_header "Cache clear"
+fin ddrush cr
+
+step_header "Finished project deploy"

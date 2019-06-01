@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+## Checks a list of pages on a site for 404s or other issues
+##
+## Usage: check-url
+#: exec_target = cli
+
+if (empty($argv[1])) {
+  unset($_SERVER['argv'][1]);
+  unset($argv[1]);
+}
+
+$loader = require_once '/var/www/' . $_ENV['DOCROOT'] . '/autoload.php';
+
+$loader->addPsr4('VML\\', __DIR__ . '/src/VML', true);
+
+use VML\Util\SingleCommandApplication;
+use VML\UrlCheck;
+
+$application = new SingleCommandApplication(new UrlCheck());
+$application->run();

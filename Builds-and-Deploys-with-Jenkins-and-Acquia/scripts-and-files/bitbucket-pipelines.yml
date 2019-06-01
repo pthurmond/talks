@@ -1,0 +1,18 @@
+### Required Environment Variables
+### see https://bitbucket.org/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/admin/addon/admin/pipelines/repository-variables
+
+image:
+  name: mystuff/docker-php-node-build:7.x
+
+clone:
+  depth: full
+
+pipelines:
+  branches:
+    'develop':
+      - step:
+          script:
+            - build/jenkins/trigger_build.sh
+
+
+#TODO: Create an auto-build for feature branches

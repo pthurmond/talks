@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+## Initialize Sites
+##
+## Usage: fin init-sites
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+  echo-red "\$PROJECT_ROOT is not set"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+# Site hash salt creation.
+SITE_SALT_DEST="${PROJECT_ROOT}/config/salt.txt"
+fin exec drush eval "echo Drupal\Component\Utility\Crypt::randomBytesBase64(55)" > $SITE_SALT_DEST
+step_header "Running: settings hash salt creation"

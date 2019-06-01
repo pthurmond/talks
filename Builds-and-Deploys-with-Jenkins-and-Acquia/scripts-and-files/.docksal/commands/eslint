@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+## Run eslint against specified files, dirs
+##
+## Usage: fin eslint <path>
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$1" == "" ]]; then
+  echo "Usage: fin eslint <path>"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+EXIT_CODE=0
+
+## Main script
+subheader "Running ESLINT..."
+
+fin run eslint --quiet $@ || fin util && fin run eslint --quiet $@
+
+EXIT_CODE=$(($EXIT_CODE + $?)) 
+exit $EXIT_CODE
+
+#-------------------------- END: Execution --------------------------------

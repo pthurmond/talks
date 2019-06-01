@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+## Sets up and cleans project dependencies
+##
+## Usage: fin init-deps
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+  echo-red "\$PROJECT_ROOT is not set"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+for var in "$@"
+do
+  case $var in
+    builder)
+      BUILDER="true"
+      ;;
+  esac
+done
+
+subheader "Initializing Dependencies"
+section=Dependencies
+step=1
+
+step_header "Installing Composer"
+
+if [[ $BUILDER == "true" ]]; then
+  fin composer install --prefer-dist --no-dev --no-progress -o -n
+else
+  fin composer install
+fi
+
+step_header "Upgrading NPM version..."
+install_nodejs
+
+step_header "Cleaning git submodules..."
+fix_submodules
+
+#-------------------------- END: Execution --------------------------------

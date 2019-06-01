@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+## Import/export environment specific configuration for a site
+##
+## Usage: fin conf
+#: exec_target = cli
+
+if (empty($argv[1])) {
+  unset($_SERVER['argv'][1]);
+  unset($argv[1]);
+}
+
+$loader = require_once '/var/www/' . $_ENV['DOCROOT'] . '/autoload.php';
+
+$loader->addPsr4('VML\\', __DIR__ . '/src/VML', true);
+
+use VML\Util\SingleCommandApplication;
+use VML\DrupalConfig;
+
+$application = new SingleCommandApplication(new DrupalConfig());
+$application->run();

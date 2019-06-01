@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+## Run Code Sniffer (phpcs) against given path
+##
+## Usage: fin phpcs <path>
+##
+## Uses Drupal standards.
+##
+## Includes extensions:	php, module, inc, install, test, profile, theme
+## Ignores:		features.*, *.pages*.inc
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$1" == "" ]]; then
+  echo "Usage: fin phpcs <path>"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+EXIT_CODE=0
+
+subheader "Running PHP Code Sniffer..."
+
+fin run phpcs \
+  -n --extensions="php,module,inc,install,test,profile,theme" \
+  --ignore="*.xml,*.pages*.inc,*.yml,.docksal,*.js,*.jpg,*.png,settings.php,*.woff,*.eot,*.ttf,*.otf,*.woff2,*.md,*.js,*.scss,*.vue,*.example,*.twig" \
+  "$@"
+
+EXIT_CODE=$(($EXIT_CODE + $?)) 
+
+fin run phpcs \
+  --standard=DrupalPractice -n \
+  --extensions="php,module,inc,install,test,profile,theme" \
+  --ignore="*.pages*.inc,*.yml,.docksal,*.js,*.jpg,*.png,settings*.php" \
+  "$1"
+
+EXIT_CODE=$(($EXIT_CODE + $?)) 
+
+exit $EXIT_CODE
+
+#-------------------------- END: Execution --------------------------------

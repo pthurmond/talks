@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+## Checks watchdog logs on a site and counts warnings and errors
+##
+## Usage: fin check-watchdog
+#: exec_target = cli
+
+if (empty($argv[1])) {
+  unset($_SERVER['argv'][1]);
+  unset($argv[1]);
+}
+
+$loader = require_once '/var/www/' . $_ENV['DOCROOT'] . '/autoload.php';
+
+$loader->addPsr4('VML\\', __DIR__ . '/src/VML', true);
+
+use VML\Util\SingleCommandApplication;
+use VML\WatchdogCheck;
+
+$application = new SingleCommandApplication(new WatchdogCheck());
+$application->run();

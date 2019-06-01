@@ -1,0 +1,38 @@
+commands:
+  - name: npm
+    run: 'npm install'
+  - name: npm-ci
+    run: 'npm ci'
+  - name: gulp-build
+    run: 'npm run gulp build'
+  - name: gulp-build-dev
+    run: 'npm run gulp build--dev'
+  - name: gulp-watch
+    run: 'npm run gulp watch'
+  - name: build:all
+    run: 'npm run build:all'
+  - name: setup
+    run: 'npm run setup'
+  - name: vue:build
+    run: 'npm run vue:build'
+  - name: ci:complete
+    run: 'npm run ci:complete'
+  - name: patternlab
+    run: 'npm run pl-postinstall'
+  - name: gulp-compile
+    run: 'npm run gulp compile'
+themes:
+  - name: unitedrentals
+    path: docroot/themes/custom/mytheme
+    cmds:
+      - npm
+      - npm-ci
+      - gulp-build
+      - gulp-build-dev
+      - gulp-watch
+      - setup
+      - build:all
+      - ci:complete
+      - vue:build
+      - patternlab
+      - gulp-compile

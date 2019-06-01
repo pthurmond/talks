@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# Initialize Project
+#
+# Usage: fin init
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+  echo-red "\$PROJECT_ROOT is not set"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+for var in "$@"
+do
+  case $var in
+    builder)
+      BUILDER="true"
+      ;;
+  esac
+done
+
+header "Project build"
+section=Project
+
+step=1
+step_header "Composer install"
+
+fin exec composer install
+
+cd docroot/themes/custom/mytheme
+
+step=2
+step_header "NPM installs"
+fin exec npm run setup
+
+step=3
+step_header "Theme build"
+fin exec npm run theme:build
+
+step=4
+step_header "Vue build"
+fin exec npm run vue:build
+
+step=5
+step_header "Finished project build"

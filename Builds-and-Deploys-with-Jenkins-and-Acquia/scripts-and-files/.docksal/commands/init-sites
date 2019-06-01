@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+## Initialize Sites
+##
+## Usage: fin init-sites
+
+#-------------------------- Helper functions --------------------------------
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/../functions.sh"
+
+#-------------------------- END: Helper functions --------------------------------
+
+#-------------------------- Sanity Check --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+  echo-red "\$PROJECT_ROOT is not set"
+  exit 1
+fi
+
+#-------------------------- END: Sanity Check --------------------------------
+
+#-------------------------- Execution --------------------------------
+
+# @todo could maybe move into functions.sh
+for var in "$@"
+do
+  case $var in
+    builder)
+      BUILDER="true"
+      ;;
+  esac
+done
+
+cd $DOCROOT_PATH
+SITES=$(fin drush sa --format=list | tr -d '\@:\r\'\' | sed -e 's/\..*$//' | sort | uniq)
+cd $PROJECT_ROOT
+
+for SITE in $SITES; do
+
+  subheader "Initializing site: \"${SITE}\""
+  section="Site: ${SITE}"
+  step=1
+
+  step_header "Starting site initialization"
+
+  # Sites folder
+  SITE_DIR="${DOCROOT_PATH}/sites/${SITE}"
+
+  if [[ ! -d $SITE_DIR ]]; then
+    step_header "Running: site folder creation"
+    mkdir "$SITE_DIR"
+  else
+    step_header "Skipping: site folder creation - already exists"
+  fi
+
+  # Site folder permissions
+  step_header "Updating: site folder permissions"
+  chmod 755 "${SITE_DIR}"
+
+  # Site configuration
+  SITE_SETTINGS_SOURCE="${DOCROOT_PATH}/sites/default/default.settings.php"
+  SITE_SETTINGS_DEST="${SITE_DIR}/settings.php"
+
+  if [[ ! -f ${SITE_SETTINGS_DEST} ]]; then
+    step_header "Copying: site configuration replication from default site configuration to ${SITE_DIR}/settings.php"
+    cp ${SITE_SETTINGS_SOURCE} ${SITE_SETTINGS_DEST}
+  else
+    step_header "Skipping: site configuration replication - already exists"
+  fi
+
+  # Site docksal configuration
+  SITE_SETTINGS_SOURCE_DOCKSAL="${DOCROOT_PATH}/sites/default/default.settings.docksal.php"
+  SITE_SETTINGS_DEST_DOCKSAL="${SITE_DIR}/settings.docksal.php"
+
+  if [[ $BUILDER == "true" ]]; then
+    step_header "Skipping: docksal site configuration replication - builder running"
+  elif [[ ! -f ${SITE_SETTINGS_DEST_DOCKSAL} ]]; then
+    step_header "Copying: docksal site configuration replication from default docksal site configuration to ${SITE_DIR}/settings.docksal.php"
+    cp ${SITE_SETTINGS_SOURCE_DOCKSAL} ${SITE_SETTINGS_DEST_DOCKSAL}
+  else
+    step_header "Skipping: docksal site configuration replication - already exists"
+  fi
+
+  # Site local configuration
+  SITE_SETTINGS_SOURCE_LOCAL="${DOCROOT_PATH}/sites/example.settings.local.php"
+  SITE_SETTINGS_DEST_LOCAL="${SITE_DIR}/settings.local.php"
+
+  if [[ $BUILDER == "true" ]]; then
+    step_header "Skipping: local site configuration replication - builder running"
+  elif [[ ! -f ${SITE_SETTINGS_DEST_LOCAL} ]]; then
+    step_header "Copying: local site configuration replication from example local site configuration to ${SITE_DIR}/settings.local.php"
+    cp ${SITE_SETTINGS_SOURCE_LOCAL} ${SITE_SETTINGS_DEST_LOCAL}
+  else
+    step_header "Skipping: local site configuration replication - already exists"
+  fi
+
+  # Parent config folder
+  SITE_CONFIG_PARENT_DIR="${PROJECT_ROOT}/config/${SITE}"
+
+  if [[ ! -d $SITE_CONFIG_PARENT_DIR ]]; then
+    step_header "Running: site config folder creation"
+    mkdir "$SITE_CONFIG_PARENT_DIR"
+  else
+    step_header "Skipping: site config folder creation - already exists"
+  fi
+
+  touch "${SITE_CONFIG_PARENT_DIR}/.gitkeep"
+
+  # Config folder
+  SITE_CONFIG_DEFAULT_DIR="${PROJECT_ROOT}/config/${SITE}/default"
+
+  if [[ ! -d $SITE_CONFIG_DEFAULT_DIR ]]; then
+    step_header "Running: default config folder creation"
+    mkdir "$SITE_CONFIG_DEFAULT_DIR"
+  else
+    step_header "Skipping: default config folder creation - already exists"
+  fi
+
+  touch "${SITE_CONFIG_DEFAULT_DIR}/.gitkeep"
+
+  # Site hash salt creation.
+  SITE_SALT_DEST="${PROJECT_ROOT}/config/salt.txt"
+
+  if [[ ! -f ${SITE_SALT_DEST} ]]; then
+     fin exec drush eval "echo Drupal\Component\Utility\Crypt::randomBytesBase64(55)" > $SITE_SALT_DEST
+     step_header "Running: settings hash salt creation"
+  else
+    step_header "Skipping: settings hash salt creation - already exists"
+  fi
+
+  # Creating database if it doesn't exist
+  if ! fin db ls | grep -q $SITE ; then
+    step_header "Running: database creation"
+    fin db create $SITE > /dev/null 2>&1
+  else
+    step_header "Skipping: database creation - already exists"
+  fi
+
+  # Update database permissions so docksal can use it.
+  step_header "Updating database permissions"
+  fin db cli GRANT ALL ON $SITE.* TO 'user' > /dev/null 2>&1
+
+  step_header "Completed site initialization"
+done
+
+#-------------------------- END: Execution --------------------------------
