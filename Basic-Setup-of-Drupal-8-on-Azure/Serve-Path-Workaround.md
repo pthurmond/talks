@@ -22,8 +22,8 @@ During setup, I ran into issues with Azure trying to serve the site from the rep
 
 ```php
 <?php
-if (isset($GLOBALS['request']) && '/docroot/index.php' === $GLOBALS['request']->server->get('SCRIPT\_NAME')) {
-  $GLOBALS['request']->server->set('SCRIPT\_NAME', '/index.php');
+if (isset($GLOBALS['request']) && '/docroot/index.php' === $GLOBALS['request']->server->get('SCRIPT_NAME')) {
+  $GLOBALS['request']->server->set('SCRIPT_NAME', '/index.php');
 }
 ?>
 ```
