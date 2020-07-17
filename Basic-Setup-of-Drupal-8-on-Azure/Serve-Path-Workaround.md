@@ -7,12 +7,12 @@ During setup, I ran into issues with Azure trying to serve the site from the rep
 1. Created a ".htaccess" file in the project root with the following in it.
 
 ```apacheconfig
-<IfModule mod\_rewrite.c>
+<IfModule mod_rewrite.c>
     RewriteEngine on
     RewriteRule ^$ docroot/$1 [L]
-    RewriteCond %{REQUEST\_FILENAME} !-d
-    RewriteCond %{REQUEST\_FILENAME} !-f
-    RewriteRule ^(.\*)$ docroot/$1 [L]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ docroot/$1 [L]
 </IfModule>
 ```
 
