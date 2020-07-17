@@ -13,7 +13,7 @@ During setup, I ran into issues with Azure trying to serve the site from the rep
     RewriteCond %{REQUEST\_FILENAME} !-d
     RewriteCond %{REQUEST\_FILENAME} !-f
     RewriteRule ^(.\*)$ docroot/$1 [L]
-<IfModule>
+</IfModule>
 ```
 
 2. Modified the ".htaccess" in the "docroot" directory. Directly above the rewrite conditions there is a commented out "RewriteBase" directive. I uncommented this and set it to "RewriteBase /docroot".
