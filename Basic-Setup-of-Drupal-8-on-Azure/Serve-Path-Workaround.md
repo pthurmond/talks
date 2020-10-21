@@ -7,13 +7,13 @@ During setup, I ran into issues with Azure trying to serve the site from the rep
 1. Created a ".htaccess" file in the project root with the following in it.
 
 ```apacheconfig
-<IfModule mod\_rewrite.c>
+<IfModule mod_rewrite.c>
     RewriteEngine on
     RewriteRule ^$ docroot/$1 [L]
-    RewriteCond %{REQUEST\_FILENAME} !-d
-    RewriteCond %{REQUEST\_FILENAME} !-f
-    RewriteRule ^(.\*)$ docroot/$1 [L]
-<IfModule>
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ docroot/$1 [L]
+</IfModule>
 ```
 
 2. Modified the ".htaccess" in the "docroot" directory. Directly above the rewrite conditions there is a commented out "RewriteBase" directive. I uncommented this and set it to "RewriteBase /docroot".
@@ -22,8 +22,8 @@ During setup, I ran into issues with Azure trying to serve the site from the rep
 
 ```php
 <?php
-if (isset($GLOBALS['request']) && '/docroot/index.php' === $GLOBALS['request']->server->get('SCRIPT\_NAME')) {
-  $GLOBALS['request']->server->set('SCRIPT\_NAME', '/index.php');
+if (isset($GLOBALS['request']) && '/docroot/index.php' === $GLOBALS['request']->server->get('SCRIPT_NAME')) {
+  $GLOBALS['request']->server->set('SCRIPT_NAME', '/index.php');
 }
 ?>
 ```
